@@ -10,26 +10,93 @@ knitr::opts_chunk$set(echo = TRUE)
 library(sas7bdat)
 library(ggplot2)
 library(dplyr)
+library(tree)
+library(rpart)
+library(randomForest)
+library(RColorBrewer) 
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Read in data
 
 ```{r cars}
-Wave1<-read.sas7bdat('Wave1.sas7bdat')
-Wave2<-read.sas7bdat('Wave2.sas7bdat')
 Wave3<-read.sas7bdat('Wave3.sas7bdat')
 ```
+Change gender from 1/2 to male/female
+```{r}
 
-## Including Plots
+Wave3$gender<-ifelse(Wave3$p2sexW3=='1', 'male','female')
+Wave3$gender<-as.factor(Wave3$gender)
+summary(Wave3$gender)
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Investigate possible precursors for bad sleep
+```{r}
+#Create vector for subsetting
+katie<-c(18,36,43,65,68,72,73,92,95,101,103,105,110,112,144,173,203,272,359,437,618,688,789,795,799,811,812,853,866,867,872:889,906,907,913,932:941,951:956,1011:1016,1068,1223)
+katie
+
+Wave3<-Wave3[katie]
+#convert numeric data to factors
+katie1<-c(1:17,19:27,29,32:67)
+Wave3[,katie1]<-as.factor(Wave3[,katie1])
+
+tree<-rpart(cq3n13 ~ .,data=Wave3)
+plot(tree)
+text(tree, cex=.5, digits=3)
+
+tree2<-rpart(cq3n15 ~ .,data=Wave3)
+plot(tree2)
+text(tree2, cex=.5, digits=3)
+
+```
+
+
+Just playing around with the data
+```{r}
+tree1<-randomForest(cq3n13 ~ .,data=Wave3, na.action=na.omit)
+plot(tree1)
+text(tree1, cex=.5, digits=3)
+colnames(Wave3)
+fit1<-lm(cq3n13~.,data=Wave3)
+summary(Wave3$cq3k5a)
+plot(Wave3$cq3k5a)
+
+summary(Wave3$cq3n2a) # #of caffinated drinks consumed
+plot(Wave3$cq3n13, Wave3$cq3n2a)#data includes outlier, need to remove
+summary(Wave3$cq3n1q) # #of fizzy drinks consumed
+plot(Wave3$cq3n13, Wave3$cq3n1q)
+
+summary(Wave3$cq3m8a) # #of gp visits
+plot(Wave3$cq3n13, Wave3$cq3m8a) #outliers
+
+summary(Wave3$cq3m2) # illness
+plot(Wave3$cq3n13, Wave3$cq3m2)
+
+summary(Wave3$cq3n7) # heavy exercise
+plot(Wave3$cq3n13, Wave3$cq3n7)
+
+summary(Wave3$cq3n8) # light exercise
+plot(Wave3$cq3n15, Wave3$cq3n8)
+
+
+sleep1<-summarize(group_by(Wave3,cq3n15, cq3n13, gender, pc3a1),count=n())
+ggplot(data=sleep1)+geom_bar(mapping=aes(x=cq3n13,y=count, fill=gender),stat='identity')
+
+ggplot(data=sleep1)+geom_bar(mapping=aes(x=cq3n13,y=count, fill=pc3a1), stat='identity')+ scale_fill_brewer(palette = "Blues") 
+Wave3$p2sexW3<-as.factor(Wave3$p2sexW3)
+gender<-summarize(group_by(Wave3, p2sexW3),count=n())
+sleep1<-summarize(group_by(Wave3, cq3n15, p2sexW3, cq3n13),count=n())
+sleep2<-summarize(group_by(Wave3, cq3n16a, cq3n16b,cq3n16c,cq3n16d,cq3n16e, cq3n16f, p2sexW3),count=n())
+ggplot(data=sleep1)+geom_bar(mapping=aes(x=cq3n15, y=count, fill=p2sexW3),stat='identity')
+ggplot(data=sleep1)+geom_col(mapping=aes( x=cq3n13, y=count, fill=p2sexW3), stat='identity', position='dodge')
+plot(gender)
+plot(sleep2)
+sleep2
+ggplot(data=sleep2)+geom_bar(mapping=aes(x=cq3n16a, y=count, fill=p2sexW3),stat='identity')
+ggplot(data=sleep2)+geom_bar(mapping=aes(x=x, y=count, fill=p2sexW3),stat='identity')
+x<-c(sleep2$cq3n16a, sleep2$cq3n16b, sleep2$cq3n16c, sleep2$cq3n16d)
+x
+ggplot(data=Wave3)+geom_histogram(mapping=aes( x=cq3n13, colo))+facet_wrap(~p2sexW3)
+```
+
