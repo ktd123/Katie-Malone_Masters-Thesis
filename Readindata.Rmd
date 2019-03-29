@@ -3,6 +3,8 @@ title: "MastersThesis"
 author: "Katie Malone  17185572"
 date: "7 March 2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -50,6 +52,7 @@ text(tree, cex=.5, digits=3)
 
 tree2<-rpart(cq3n15 ~ .,data=Wave3)
 plot(tree2)
+
 text(tree2, cex=.5, digits=3)
 
 ```
