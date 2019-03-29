@@ -34,7 +34,7 @@ Investigate possible precursors for bad sleep
 ```{r}
 #Create vector for subsetting
 katie<-c(18,36,43,65,68,72,73,92,95,101,103,105,110,112,144,173,203,272,359,437,618,688,789,795,799,811,812,853,866,867,872:889,906,907,913,932:941,951:956,1011:1016,1068,1223)
-katie
+length(katie)
 
 Wave3<-Wave3[katie]
 #convert numeric data to factors
