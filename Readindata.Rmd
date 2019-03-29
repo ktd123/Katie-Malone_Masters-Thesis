@@ -25,6 +25,7 @@ Change gender from 1/2 to male/female
 ```{r}
 
 Wave3$gender<-ifelse(Wave3$p2sexW3=='1', 'male','female')
+class(Wave3$gender)
 Wave3$gender<-as.factor(Wave3$gender)
 summary(Wave3$gender)
 
@@ -36,11 +37,13 @@ Investigate possible precursors for bad sleep
 katie<-c(18,36,43,65,68,72,73,92,95,101,103,105,110,112,144,173,203,272,359,437,618,688,789,795,799,811,812,853,866,867,872:889,906,907,913,932:941,951:956,1011:1016,1068,1223)
 length(katie)
 
-Wave3<-Wave3[katie]
+Wave3subset<-Wave3[,katie]
+glimpse(Wave3subset)
 #convert numeric data to factors
 katie1<-c(1:17,19:27,29,32:67)
-Wave3[,katie1]<-as.factor(Wave3[,katie1])
-
+Wave4<- Wave3subset
+Wave4[,katie1]<-lapply(Wave3subset[,katie1], factor)
+glimpse(Wave4)
 tree<-rpart(cq3n13 ~ .,data=Wave3)
 plot(tree)
 text(tree, cex=.5, digits=3)
